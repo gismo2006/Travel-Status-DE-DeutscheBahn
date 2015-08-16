@@ -1,4 +1,4 @@
-package Travel::Status::DE::DeutscheBahn::Result;
+package Travel::Status::DE::HAFAS::Result;
 
 use strict;
 use warnings;
@@ -10,8 +10,8 @@ use parent 'Class::Accessor';
 
 our $VERSION = '1.05';
 
-Travel::Status::DE::DeutscheBahn::Result->mk_ro_accessors(
-	qw(date time train route_end route_raw platform info_raw routeinfo_raw));
+Travel::Status::DE::HAFAS::Result->mk_ro_accessors(
+	qw(date delay time train route_end route_raw platform info_raw routeinfo_raw));
 
 sub new {
 	my ( $obj, %conf ) = @_;
@@ -45,21 +45,6 @@ sub info {
 	$info =~ s{ ^ , }{}ox;
 
 	return $info;
-}
-
-sub delay {
-	my ($self) = @_;
-
-	my $info = $self->info_raw;
-
-	if ( $info =~ m{ p.nktlich }ox ) {
-		return 0;
-	}
-	if ( $info =~ m{ (?: ca \. \s* )? \+ (?<delay> \d+) :? \s* }ox ) {
-		return $+{delay};
-	}
-
-	return;
 }
 
 sub is_cancelled {
