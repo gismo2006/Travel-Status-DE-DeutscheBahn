@@ -85,14 +85,19 @@ sub display_result {
 	}
 
 	for my $line (@lines) {
+
+		my $d = $line->[7];
+		if ( $d->messages ) {
+			print "\n";
+			for my $msg ( $d->messages ) {
+				printf( "# %s\n", $msg );
+			}
+		}
+
 		printf(
 			join( q{  }, ( map { "%-${_}s" } @line_length ) ) . "\n",
 			@{$line}[ 0 .. 5 ]
 		);
-
-		if ( $line->[7] ) {
-			print "       " . $line->[7] . "\n";
-		}
 
 		if ($show_full_route) {
 			print "\n" . $line->[6] . "\n\n\n";
@@ -129,10 +134,10 @@ for my $d ( $status->results() ) {
 			$arrivals ? q{} : join( q{  }, $d->route_interesting ),
 			$d->route_end,
 			$d->platform,
-			$d->delay ? '+'.$d->delay : q{},
+			$d->delay ? '+' . $d->delay : q{},
 			join( "\n",
 				map { sprintf( '%-5s  %s', @{$_} ) } $d->route_timetable ),
-			$d->route_info,
+			$d,
 		]
 	);
 }

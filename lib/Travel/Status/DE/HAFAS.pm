@@ -46,27 +46,26 @@ sub new {
 			$conf{mot}->{tram}  // 0,
 		],
 		post => {
-			productsFilter      => '11111111111111',
-			input               => $conf{station},
-			date                => $conf{date} || $date,
-			time                => $conf{time} || $time,
-			start               => 'yes',
-			boardType           => $conf{mode} // 'dep',
-			L                   => 'vs_java3',
+			productsFilter => '11111111111111',
+			input          => $conf{station},
+			date           => $conf{date} || $date,
+			time           => $conf{time} || $time,
+			start          => 'yes',
+			boardType      => $conf{mode} // 'dep',
+			L              => 'vs_java3',
 		},
 	};
 
-#	for my $i ( 0 .. @{ $ref->{mot_filter} } ) {
-#		if ( $ref->{mot_filter}->[$i] ) {
-#			$ref->{post}->{"GUIREQProduct_$i"} = 'on';
-#		}
-#	}
+	#	for my $i ( 0 .. @{ $ref->{mot_filter} } ) {
+	#		if ( $ref->{mot_filter}->[$i] ) {
+	#			$ref->{post}->{"GUIREQProduct_$i"} = 'on';
+	#		}
+	#	}
 
 	bless( $ref, $obj );
 
 	$reply
-	  = $ua->post(
-		"http://reiseauskunft.bahn.de/bin/bhftafel.exe/${lang}n",
+	  = $ua->post( "http://reiseauskunft.bahn.de/bin/bhftafel.exe/${lang}n",
 		$ref->{post} );
 
 	if ( $reply->is_error ) {
@@ -75,13 +74,17 @@ sub new {
 	}
 
 	# the interface does not return valid XML (but it's close!)
-	$ref->{html} = '<?xml version="1.0" encoding="iso-8859-15"?><wrap>' . $reply->content . '</wrap>';
+	$ref->{html}
+	  = '<?xml version="1.0" encoding="iso-8859-15"?><wrap>'
+	  . $reply->content
+	  . '</wrap>';
 
 	$ref->{tree} = XML::LibXML->load_xml(
-		string            => $ref->{html},
-#		recover           => 2,
-#		suppress_errors   => 1,
-#		suppress_warnings => 1,
+		string => $ref->{html},
+
+		#		recover           => 2,
+		#		suppress_errors   => 1,
+		#		suppress_warnings => 1,
 	);
 
 	say $ref->{tree}->toString(1);
@@ -115,11 +118,13 @@ sub check_input_error {
 	my ($self) = @_;
 
 	my $xp_err = XML::LibXML::XPathExpression->new('//Err');
-	my $err = ( $self->{tree}->findnodes($xp_err) )[0];
+	my $err    = ( $self->{tree}->findnodes($xp_err) )[0];
 
 	if ($err) {
-		$self->{errstr} = $err->getAttribute('text') . ' (code '
-		. $err->getAttribute('code') . ')';
+		$self->{errstr}
+		  = $err->getAttribute('text')
+		  . ' (code '
+		  . $err->getAttribute('code') . ')';
 	}
 
 	return;
@@ -153,8 +158,8 @@ sub results {
 	my ($self) = @_;
 	my $mode = $self->{post}->{boardType};
 
-	my $xp_element = XML::LibXML::XPathExpression->new(
-		'//Journey');
+	my $xp_element = XML::LibXML::XPathExpression->new('//Journey');
+	my $xp_msg     = XML::LibXML::XPathExpression->new('./HIMMessage');
 
 	if ( defined $self->{results} ) {
 		return @{ $self->{results} };
@@ -167,17 +172,23 @@ sub results {
 
 	for my $tr ( @{ $self->{tree}->findnodes($xp_element) } ) {
 
-		my $train = $tr->getAttribute('prod');
-		my $time = $tr->getAttribute('fpTime');
-		my $date = $tr->getAttribute('fpDate');
-		my $dest = $tr->getAttribute('targetLoc');
-		my $platform = $tr->getAttribute('platform');
-		my $delay = $tr->getAttribute('e_delay');
-		my $info = $tr->textContent;
-		my $routeinfo = $tr->textContent;
+		my @message_nodes = $tr->findnodes($xp_msg);
+		my $train         = $tr->getAttribute('prod');
+		my $time          = $tr->getAttribute('fpTime');
+		my $date          = $tr->getAttribute('fpDate');
+		my $dest          = $tr->getAttribute('targetLoc');
+		my $platform      = $tr->getAttribute('platform');
+		my $delay         = $tr->getAttribute('e_delay');
+		my $info          = $tr->textContent;
+		my $routeinfo     = $tr->textContent;
+		my @messages;
 
 		if ( not( $time and $dest ) ) {
 			next;
+		}
+
+		for my $n (@message_nodes) {
+			push( @messages, $n->getAttribute('header') );
 		}
 
 		substr( $date, 6, 0 ) = '20';
@@ -193,6 +204,7 @@ sub results {
 			Travel::Status::DE::HAFAS::Result->new(
 				date          => $date,
 				delay         => $delay,
+				messages      => \@messages,
 				time          => $time,
 				train         => $train,
 				route_raw     => q{},
