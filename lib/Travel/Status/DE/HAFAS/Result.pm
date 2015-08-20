@@ -86,8 +86,8 @@ __END__
 
 =head1 NAME
 
-Travel::Status::DE::DeutscheBahn::Result - Information about a single
-arrival/departure received by Travel::Status::DE::DeutscheBahn
+Travel::Status::DE::HAFAS::Result - Information about a single
+arrival/departure received by Travel::Status::DE::HAFAS
 
 =head1 SYNOPSIS
 
@@ -118,8 +118,8 @@ version 1.05
 
 =head1 DESCRIPTION
 
-Travel::Status::DE::DeutscheBahn::Result describes a single arrival/departure
-as obtained by Travel::Status::DE::DeutscheBahn.  It contains information about
+Travel::Status::DE::HAFAS::Result describes a single arrival/departure
+as obtained by Travel::Status::DE::HAFAS.  It contains information about
 the platform, time, route and more.
 
 =head1 METHODS
@@ -165,7 +165,7 @@ station and its origin/destination.
 =item $result->route_end
 
 Returns the last element of the route.  Depending on how you set up
-Travel::Status::DE::DeutscheBahn (arrival or departure listing), this is
+Travel::Status::DE::HAFAS (arrival or departure listing), this is
 either the train's destination or its origin station.
 
 =item $result->destination
@@ -222,9 +222,9 @@ or "ICE" for InterCity-Express.
 
 =over
 
-=item $result = Travel::Status::DE::DeutscheBahn::Result->new(I<%data>)
+=item $result = Travel::Status::DE::HAFAS::Result->new(I<%data>)
 
-Returns a new Travel::Status::DE::DeutscheBahn::Result object.
+Returns a new Travel::Status::DE::HAFAS::Result object.
 You usually do not need to call this.
 
 Required I<data>:
@@ -267,7 +267,7 @@ None known.
 
 =head1 SEE ALSO
 
-Travel::Status::DE::DeutscheBahn(3pm).
+Travel::Status::DE::HAFAS(3pm).
 
 =head1 AUTHOR
 

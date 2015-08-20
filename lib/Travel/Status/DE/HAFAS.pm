@@ -228,14 +228,14 @@ __END__
 
 =head1 NAME
 
-Travel::Status::DE::DeutscheBahn - Interface to the DeutscheBahn online
-arrival/departure monitor
+Travel::Status::DE::HAFAS - Interface to HAFAS-based online arrival/departure
+monitors
 
 =head1 SYNOPSIS
 
-	use Travel::Status::DE::DeutscheBahn;
+	use Travel::Status::DE::HAFAS;
 
-	my $status = Travel::Status::DE::DeutscheBahn->new(
+	my $status = Travel::Status::DE::HAFAS->new(
 		station => 'Essen Hbf',
 	);
 
@@ -259,8 +259,8 @@ version 1.05
 
 =head1 DESCRIPTION
 
-Travel::Status::DE::DeutscheBahn is an interface to the DeutscheBahn
-arrival/departure monitor available at
+Travel::Status::DE::HAFAS is an interface to HAFAS-based
+arrival/departure monitors, for instance the one available at
 L<http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn>.
 
 It takes a station name and (optional) date and time and reports all arrivals
@@ -271,10 +271,10 @@ unspecified).
 
 =over
 
-=item my $status = Travel::Status::DE::DeutscheBahn->new(I<%opts>)
+=item my $status = Travel::Status::DE::HAFAS->new(I<%opts>)
 
 Requests the departures/arrivals as specified by I<opts> and returns a new
-Travel::Status::DE::DeutscheBahn element with the results.  Dies if the wrong
+Travel::Status::DE::HAFAS element with the results.  Dies if the wrong
 I<opts> were passed.
 
 Supported I<opts> are:
@@ -306,7 +306,7 @@ Time to report for.  Defaults to now.
 
 =item B<mode> => B<arr>|B<dep>
 
-By default, Travel::Status::DE::DeutscheBahn reports train departures
+By default, Travel::Status::DE::HAFAS reports train departures
 (B<dep>).  Set this to B<arr> to get arrivals instead.
 
 =item B<mot> => I<\%hashref>
@@ -331,7 +331,7 @@ no error occurred, returns undef.
 =item $status->results
 
 Returns a list of arrivals/departures.  Each list element is a
-Travel::Status::DE::DeutscheBahn::Result(3pm) object.
+Travel::Status::DE::HAFAS::Result(3pm) object.
 
 If no matching results were found or the parser / http request failed, returns
 undef.
@@ -360,7 +360,7 @@ There are a few character encoding issues.
 
 =head1 SEE ALSO
 
-Travel::Status::DE::DeutscheBahn::Result(3pm).
+Travel::Status::DE::HAFAS::Result(3pm).
 
 =head1 AUTHOR
 
