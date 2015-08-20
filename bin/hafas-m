@@ -26,13 +26,11 @@ binmode( STDOUT, ':encoding(utf-8)' );
 GetOptions(
 	'a|arrivals'    => \$arrivals,
 	'd|date=s'      => \$date,
-	'f|full-route'  => \$show_full_route,
 	'h|help'        => sub { show_help(0) },
 	'l|lang=s'      => \$language,
 	'L|ignore-late' => \$ignore_late,
 	'm|mot=s'       => \$types,
 	't|time=s'      => \$time,
-	'v|via=s'       => \$filter_via,
 	'V|version'     => \&show_version,
 
 ) or show_help(1);
@@ -58,15 +56,15 @@ my $status = Travel::Status::DE::HAFAS->new(
 sub show_help {
 	my ($code) = @_;
 
-	print 'Usage: db-ris [-d <dd.mm.yyyy>] [-m <motlist>] [-t <time>] '
-	  . "[-v <via>] <station>\n"
-	  . "See also: man db-ris\n";
+	print 'Usage: hafas-m [-d <dd.mm.yyyy>] [-m <motlist>] [-t <time>] '
+	  . "<station>\n"
+	  . "See also: man hafas-m\n";
 
 	exit $code;
 }
 
 sub show_version {
-	say "db-ris version ${VERSION}";
+	say "hafas-m version ${VERSION}";
 
 	exit 0;
 }
@@ -151,12 +149,12 @@ __END__
 
 =head1 NAME
 
-db-ris - Interface to the DeutscheBahn online departure monitor
+hafas-m - Interface to the DeutscheBahn/HAFAS online departure monitor
 
 =head1 SYNOPSIS
 
-B<db-ris> [B<-a>] [B<-d> I<date>] [B<-L>] [B<-m> I<motlist>] [B<-t> I<time>]
-[B<-v> I<via>] I<station>
+B<hafas-m> [B<-a>] [B<-d> I<date>] [B<-L>] [B<-m> I<motlist>] [B<-t> I<time>]
+I<station>
 
 =head1 VERSION
 
@@ -164,8 +162,8 @@ version 1.05
 
 =head1 DESCRIPTION
 
-db-ris is an interface to the DeutscheBahn departure monitor
-available at L<http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn>.
+hafas-m is an interface to HAFAS-based departure monitors, for instance the
+one available at L<http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn>.
 
 It requests all departures at I<station> (optionally filtered by date, time,
 route and means of transport) and lists them on stdout, similar to the big
@@ -185,10 +183,6 @@ I<station>, not I<station> and end.
 =item B<-d>, B<--date> I<dd>.I<mm>.I<yyyy>
 
 Date to list departures for.  Default: today.
-
-=item B<-f>, B<--full-route>
-
-Display complete routes (including arrival times) of all trains.
 
 =item B<-l>, B<--lang> B<d>|B<e>|B<i>|B<n>
 
@@ -223,13 +217,6 @@ only want to see S-Bahn and U-Bahn departures, you'd have to use C<< -m
 
 Time to list departures for.  Default: now.
 
-=item B<-v>, B<--via> I<regex>
-
-Only display trains whose route (all stations between the current stop and the
-destination) matches the perl regular expression I<regex>.  The match is not
-case-sensitive.  Use '^regex$' to match a full string, but be aware that this
-may not work as expected.
-
 =item B<-V>, B<--version>
 
 Show version information.
@@ -258,12 +245,11 @@ None.
 
 =head1 BUGS AND LIMITATIONS
 
-There are a few character encoding problems (most notably, B<--via> does not
-understand UTF-8 umlauts).
+Unknown.
 
 =head1 AUTHOR
 
-Copyright (C) 2011 by Daniel Friesel E<lt>derf@finalrewind.orgE<gt>
+Copyright (C) 2015 by Daniel Friesel E<lt>derf@finalrewind.orgE<gt>
 
 =head1 LICENSE
 
