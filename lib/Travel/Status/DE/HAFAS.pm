@@ -178,8 +178,9 @@ sub results {
 		my $date          = $tr->getAttribute('fpDate');
 		my $dest          = $tr->getAttribute('targetLoc');
 		my $platform      = $tr->getAttribute('platform');
-		my $delay         = $tr->getAttribute('e_delay');
-		my $info          = $tr->textContent;
+		my $delay         = $tr->getAttribute('delay');
+		my $e_delay       = $tr->getAttribute('e_delay');
+		my $info          = $tr->getAttribute('delayReason');
 		my $routeinfo     = $tr->textContent;
 		my @messages;
 
@@ -204,6 +205,7 @@ sub results {
 			Travel::Status::DE::HAFAS::Result->new(
 				date          => $date,
 				delay         => $delay,
+				e_delay       => $e_delay,
 				messages      => \@messages,
 				time          => $time,
 				train         => $train,

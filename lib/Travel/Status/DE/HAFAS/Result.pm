@@ -11,7 +11,7 @@ use parent 'Class::Accessor';
 our $VERSION = '1.05';
 
 Travel::Status::DE::HAFAS::Result->mk_ro_accessors(
-	qw(date delay time train route_end route_raw platform info_raw routeinfo_raw)
+	qw(date e_delay delay time train route_end route_raw platform info_raw routeinfo_raw)
 );
 
 sub new {
@@ -39,20 +39,13 @@ sub info {
 
 	my $info = $self->info_raw;
 
-	$info =~ s{ ,Grund }{}ox;
-	$info =~ s{ ^ \s+ }{}ox;
-	$info
-	  =~ s{ (?: ^ | , ) (?: p.nktlich | [nk] [.] [Aa] [.] | on \s time ) }{}ox;
-	$info =~ s{ ^ , }{}ox;
-
 	return $info;
 }
 
 sub is_cancelled {
 	my ($self) = @_;
-	my $info = $self->info_raw;
 
-	if ( $info =~ m{ Fahrt \s f.llt \s aus }ox ) {
+	if ( $self->{delay} and $self->{delay} eq 'cancel' ) {
 		return 1;
 	}
 	return 0;

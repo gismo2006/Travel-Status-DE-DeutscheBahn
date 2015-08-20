@@ -80,13 +80,13 @@ sub display_result {
 		die("Nothing to show\n");
 	}
 
-	for my $i ( 0 .. 5 ) {
+	for my $i ( 0 .. 6 ) {
 		$line_length[$i] = max map { length( $_->[$i] ) } @lines;
 	}
 
 	for my $line (@lines) {
 
-		my $d = $line->[7];
+		my $d = $line->[8];
 		if ( $d->messages ) {
 			print "\n";
 			for my $msg ( $d->messages ) {
@@ -96,11 +96,11 @@ sub display_result {
 
 		printf(
 			join( q{  }, ( map { "%-${_}s" } @line_length ) ) . "\n",
-			@{$line}[ 0 .. 5 ]
+			@{$line}[ 0 .. 6 ]
 		);
 
 		if ($show_full_route) {
-			print "\n" . $line->[6] . "\n\n\n";
+			print "\n" . $line->[7] . "\n\n\n";
 		}
 	}
 
@@ -122,7 +122,7 @@ for my $d ( $status->results() ) {
 		next;
 	}
 
-	if ( $ignore_late and $d->delay ) {
+	if ( $ignore_late and $d->e_delay ) {
 		next;
 	}
 
@@ -130,11 +130,14 @@ for my $d ( $status->results() ) {
 		@output,
 		[
 			$d->time,
+			$d->is_cancelled
+			? 'CANCELED'
+			: ( $d->e_delay ? '+' . $d->e_delay : q{} ),
 			$d->train,
 			$arrivals ? q{} : join( q{  }, $d->route_interesting ),
 			$d->route_end,
 			$d->platform,
-			$d->delay ? '+' . $d->delay : q{},
+			$d->info,
 			join( "\n",
 				map { sprintf( '%-5s  %s', @{$_} ) } $d->route_timetable ),
 			$d,
