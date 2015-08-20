@@ -12,11 +12,9 @@ use Travel::Status::DE::HAFAS;
 my %train_type;
 
 my ( $date, $time );
-my $arrivals = 0;
-my $filter_via;
-my $ignore_late     = 0;
-my $show_full_route = 0;
-my $types           = q{};
+my $arrivals    = 0;
+my $ignore_late = 0;
+my $types       = q{};
 my $language;
 
 my @output;
@@ -78,13 +76,13 @@ sub display_result {
 		die("Nothing to show\n");
 	}
 
-	for my $i ( 0 .. 6 ) {
+	for my $i ( 0 .. 4 ) {
 		$line_length[$i] = max map { length( $_->[$i] ) } @lines;
 	}
 
 	for my $line (@lines) {
 
-		my $d = $line->[8];
+		my $d = $line->[6];
 		if ( $d->messages ) {
 			print "\n";
 			for my $msg ( $d->messages ) {
@@ -94,12 +92,8 @@ sub display_result {
 
 		printf(
 			join( q{  }, ( map { "%-${_}s" } @line_length ) ) . "\n",
-			@{$line}[ 0 .. 6 ]
+			@{$line}[ 0 .. 4 ]
 		);
-
-		if ($show_full_route) {
-			print "\n" . $line->[7] . "\n\n\n";
-		}
 	}
 
 	return;
@@ -111,14 +105,6 @@ if ( my $err = $status->errstr ) {
 }
 
 for my $d ( $status->results() ) {
-
-	my @via;
-
-	@via = $d->route;
-
-	if ( $filter_via and not( first { $_ =~ m{$filter_via}io } @via ) ) {
-		next;
-	}
 
 	if ( $ignore_late and $d->e_delay ) {
 		next;
@@ -132,13 +118,10 @@ for my $d ( $status->results() ) {
 			? 'CANCELED'
 			: ( $d->e_delay ? '+' . $d->e_delay : q{} ),
 			$d->train,
-			$arrivals ? q{} : join( q{  }, $d->route_interesting ),
 			$d->route_end,
 			$d->platform,
 			$d->info,
-			join( "\n",
-				map { sprintf( '%-5s  %s', @{$_} ) } $d->route_timetable ),
-			$d,
+			$d
 		]
 	);
 }

@@ -11,8 +11,7 @@ use parent 'Class::Accessor';
 our $VERSION = '1.05';
 
 Travel::Status::DE::HAFAS::Result->mk_ro_accessors(
-	qw(date e_delay delay time train route_end route_raw platform info_raw routeinfo_raw)
-);
+	qw(date e_delay delay time train route_end platform info_raw));
 
 sub new {
 	my ( $obj, %conf ) = @_;
@@ -64,80 +63,6 @@ sub origin {
 	my ($self) = @_;
 
 	return $self->{route_end};
-}
-
-sub route {
-	my ($self) = @_;
-
-	my @stops = map { $_->[1] } @{ $self->{route} };
-	return @stops;
-}
-
-sub route_info {
-	my ($self) = @_;
-
-	my $route_info = $self->routeinfo_raw;
-
-	$route_info =~ s{ ^ [\s\n]+ }{}x;
-	$route_info =~ s{ [\s\n]+ $ }{}x;
-
-	return $route_info;
-}
-
-sub route_interesting {
-	my ( $self, $max_parts ) = @_;
-
-	my @via = $self->route;
-	my ( @via_main, @via_show, $last_stop );
-	$max_parts //= 3;
-
-	for my $stop (@via) {
-		if ( $stop =~ m{ Hbf | Flughafen }ox ) {
-			push( @via_main, $stop );
-		}
-	}
-	$last_stop = pop(@via);
-
-	if ( @via_main and $via_main[-1] eq $last_stop ) {
-		pop(@via_main);
-	}
-
-	if ( @via_main and @via and $via[0] eq $via_main[0] ) {
-		shift(@via_main);
-	}
-
-	if ( @via < $max_parts ) {
-		@via_show = @via;
-	}
-	else {
-		if ( @via_main >= $max_parts ) {
-			@via_show = ( $via[0] );
-		}
-		else {
-			@via_show = splice( @via, 0, $max_parts - @via_main );
-		}
-
-		while ( @via_show < $max_parts and @via_main ) {
-			my $stop = shift(@via_main);
-			if ( $stop ~~ \@via_show or $stop eq $last_stop ) {
-				next;
-			}
-			push( @via_show, $stop );
-		}
-	}
-
-	for (@via_show) {
-		s{ ?Hbf}{};
-	}
-
-	return @via_show;
-
-}
-
-sub route_timetable {
-	my ($self) = @_;
-
-	return @{ $self->{route} };
 }
 
 sub TO_JSON {
