@@ -119,7 +119,7 @@ for my $d ( $status->results() ) {
 			: ( $d->e_delay ? '+' . $d->e_delay : q{} ),
 			$d->train,
 			$d->route_end,
-			$d->platform,
+			( $d->platform // q{} ) . ( $d->is_changed_platform ? ' !' : q{} ),
 			$d->info,
 			$d
 		]

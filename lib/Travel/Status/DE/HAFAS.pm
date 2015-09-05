@@ -178,6 +178,7 @@ sub results {
 		my $date          = $tr->getAttribute('fpDate');
 		my $dest          = $tr->getAttribute('targetLoc');
 		my $platform      = $tr->getAttribute('platform');
+		my $new_platform  = $tr->getAttribute('newpl');
 		my $delay         = $tr->getAttribute('delay');
 		my $e_delay       = $tr->getAttribute('e_delay');
 		my $info          = $tr->getAttribute('delayReason');
@@ -194,7 +195,6 @@ sub results {
 
 		substr( $date, 6, 0 ) = '20';
 
-		$platform  //= q{};
 		$info      //= q{};
 		$routeinfo //= q{};
 
@@ -213,6 +213,7 @@ sub results {
 				route         => [],
 				route_end     => $dest,
 				platform      => $platform,
+				new_platform  => $new_platform,
 				info_raw      => $info,
 				routeinfo_raw => $routeinfo,
 			)

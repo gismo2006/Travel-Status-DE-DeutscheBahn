@@ -11,7 +11,7 @@ use parent 'Class::Accessor';
 our $VERSION = '1.05';
 
 Travel::Status::DE::HAFAS::Result->mk_ro_accessors(
-	qw(date e_delay delay time train route_end platform info_raw));
+	qw(date e_delay delay time train route_end info_raw));
 
 sub new {
 	my ( $obj, %conf ) = @_;
@@ -50,6 +50,22 @@ sub is_cancelled {
 	return 0;
 }
 
+sub is_changed_platform {
+	my ($self) = @_;
+
+	if ( defined $self->{new_platform} and defined $self->{platform} ) {
+		if ( $self->{new_platform} ne $self->{platform} ) {
+			return 1;
+		}
+		return 0;
+	}
+	if ( defined $self->{net_platform} ) {
+		return 1;
+	}
+
+	return 0;
+}
+
 sub messages {
 	my ($self) = @_;
 
@@ -63,6 +79,12 @@ sub origin {
 	my ($self) = @_;
 
 	return $self->{route_end};
+}
+
+sub platform {
+	my ($self) = @_;
+
+	return $self->{new_platform} // $self->{platform};
 }
 
 sub TO_JSON {
