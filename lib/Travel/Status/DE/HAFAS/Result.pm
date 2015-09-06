@@ -11,7 +11,7 @@ use parent 'Class::Accessor';
 our $VERSION = '1.05';
 
 Travel::Status::DE::HAFAS::Result->mk_ro_accessors(
-	qw(date e_delay delay time train route_end info_raw));
+	qw(date raw_e_delay raw_delay time train route_end info_raw));
 
 sub new {
 	my ( $obj, %conf ) = @_;
@@ -19,6 +19,21 @@ sub new {
 	my $ref = \%conf;
 
 	return bless( $ref, $obj );
+}
+
+sub delay {
+	my ($self) = @_;
+
+	if ( defined $self->{raw_e_delay} ) {
+		return $self->{raw_e_delay};
+	}
+	if (    defined $self->{raw_delay}
+		and $self->{raw_delay} ne '-'
+		and $self->{raw_delay} ne 'cancel' )
+	{
+		return $self->{raw_delay};
+	}
+	return;
 }
 
 sub destination {
@@ -44,7 +59,7 @@ sub info {
 sub is_cancelled {
 	my ($self) = @_;
 
-	if ( $self->{delay} and $self->{delay} eq 'cancel' ) {
+	if ( $self->{raw_delay} and $self->{raw_delay} eq 'cancel' ) {
 		return 1;
 	}
 	return 0;

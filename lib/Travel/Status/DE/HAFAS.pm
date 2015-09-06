@@ -211,8 +211,8 @@ sub results {
 			@{ $self->{results} },
 			Travel::Status::DE::HAFAS::Result->new(
 				date          => $date,
-				delay         => $delay,
-				e_delay       => $e_delay,
+				raw_delay     => $delay,
+				raw_e_delay   => $e_delay,
 				messages      => \@messages,
 				time          => $time,
 				train         => $train,

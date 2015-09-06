@@ -94,9 +94,13 @@ sub display_result {
 		}
 
 		printf(
-			join( q{  }, ( map { "%-${_}s" } @line_length ) ) . "\n",
+			join( q{  }, ( map { "%-${_}s" } @line_length ) ),
 			@{$line}[ 0 .. 4 ]
 		);
+		if ( $line->[5] ) {
+			print $line->[5];
+		}
+		print "\n";
 	}
 
 	return;
@@ -109,7 +113,7 @@ if ( my $err = $status->errstr ) {
 
 for my $d ( $status->results() ) {
 
-	if ( $ignore_late and $d->e_delay ) {
+	if ( $ignore_late and $d->delay ) {
 		next;
 	}
 
@@ -119,7 +123,7 @@ for my $d ( $status->results() ) {
 			$d->time,
 			$d->is_cancelled
 			? 'CANCELED'
-			: ( $d->e_delay ? '+' . $d->e_delay : q{} ),
+			: ( $d->delay ? '+' . $d->delay : q{} ),
 			$d->train,
 			$d->route_end,
 			( $d->platform // q{} ) . ( $d->is_changed_platform ? ' !' : q{} ),
