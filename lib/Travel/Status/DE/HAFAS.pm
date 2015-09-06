@@ -34,7 +34,8 @@ sub new {
 	}
 
 	my $ref = {
-		mot_filter => [
+		developer_mode => $conf{developer_mode},
+		mot_filter     => [
 			$conf{mot}->{ice}   // 1,
 			$conf{mot}->{ic_ec} // 1,
 			$conf{mot}->{d}     // 1,
@@ -74,20 +75,26 @@ sub new {
 	}
 
 	# the interface does not return valid XML (but it's close!)
-	$ref->{html}
+	$ref->{raw_xml}
 	  = '<?xml version="1.0" encoding="iso-8859-15"?><wrap>'
 	  . $reply->content
 	  . '</wrap>';
 
+	if ( $ref->{developer_mode} ) {
+		say $ref->{raw_xml};
+	}
+
 	$ref->{tree} = XML::LibXML->load_xml(
-		string => $ref->{html},
+		string => $ref->{raw_xml},
 
 		#		recover           => 2,
 		#		suppress_errors   => 1,
 		#		suppress_warnings => 1,
 	);
 
-	say $ref->{tree}->toString(1);
+	if ( $ref->{developer_mode} ) {
+		say $ref->{tree}->toString(1);
+	}
 
 	$ref->check_input_error();
 
