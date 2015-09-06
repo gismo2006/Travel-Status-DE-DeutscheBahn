@@ -16,8 +16,11 @@ our $VERSION = '1.05';
 
 sub new {
 	my ( $obj, %conf ) = @_;
-	my $date = strftime( '%d.%m.%Y', localtime(time) );
-	my $time = strftime( '%H:%M',    localtime(time) );
+
+	my $date = $conf{date} // strftime( '%d.%m.%Y', localtime(time) );
+	my $time = $conf{time} // strftime( '%H:%M',    localtime(time) );
+	my $lang = $conf{language} // 'd';
+	my $mode = $conf{mode}     // 'dep';
 
 	my %lwp_options = %{ $conf{lwp_options} // { timeout => 10 } };
 
@@ -26,8 +29,6 @@ sub new {
 	$ua->env_proxy;
 
 	my $reply;
-
-	my $lang = $conf{language} // 'd';
 
 	if ( not $conf{station} ) {
 		confess('You need to specify a station');
@@ -49,11 +50,11 @@ sub new {
 		post => {
 			productsFilter => '11111111111111',
 			input          => $conf{station},
-			date           => $conf{date} || $date,
-			time           => $conf{time} || $time,
-			start          => 'yes',
-			boardType      => $conf{mode} // 'dep',
-			L              => 'vs_java3',
+			date           => $date,
+			time           => $time,
+			start     => 'yes',     # value doesn't matter, just needs to be set
+			boardType => $mode,
+			L         => 'vs_java3',
 		},
 	};
 
@@ -70,7 +71,7 @@ sub new {
 		$ref->{post} );
 
 	if ( $reply->is_error ) {
-		$ref->{errstr} = $reply->status_line();
+		$ref->{errstr} = $reply->status_line;
 		return $ref;
 	}
 
@@ -96,8 +97,7 @@ sub new {
 		say $ref->{tree}->toString(1);
 	}
 
-	$ref->check_input_error();
-
+	$ref->check_input_error;
 	return $ref;
 }
 
