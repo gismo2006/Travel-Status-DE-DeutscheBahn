@@ -143,24 +143,6 @@ sub errstr {
 	return $self->{errstr};
 }
 
-sub get_node {
-	my ( $parent, $name, $xpath, $index ) = @_;
-	$index //= 0;
-
-	my @nodes = $parent->findnodes($xpath);
-
-	if ( $#nodes < $index ) {
-
-		# called by map, so we must explicitly return undef.
-		## no critic (Subroutines::ProhibitExplicitReturnUndef)
-		return undef;
-	}
-
-	my $node = $nodes[$index];
-
-	return $node->textContent;
-}
-
 sub results {
 	my ($self) = @_;
 	my $mode = $self->{post}->{boardType};
@@ -216,12 +198,10 @@ sub results {
 				messages      => \@messages,
 				time          => $time,
 				train         => $train,
-				route_raw     => q{},
-				route         => [],
 				route_end     => $dest,
 				platform      => $platform,
 				new_platform  => $new_platform,
-				info_raw      => $info,
+				info          => $info,
 				routeinfo_raw => $routeinfo,
 			)
 		);
@@ -364,7 +344,7 @@ None.
 
 =head1 BUGS AND LIMITATIONS
 
-There are a few character encoding issues.
+Unknown.
 
 =head1 SEE ALSO
 
@@ -372,7 +352,7 @@ Travel::Status::DE::HAFAS::Result(3pm).
 
 =head1 AUTHOR
 
-Copyright (C) 2011 by Daniel Friesel E<lt>derf@finalrewind.orgE<gt>
+Copyright (C) 2015 by Daniel Friesel E<lt>derf@finalrewind.orgE<gt>
 
 =head1 LICENSE
 

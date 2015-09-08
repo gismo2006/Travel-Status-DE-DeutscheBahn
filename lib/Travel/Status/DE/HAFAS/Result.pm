@@ -4,14 +4,14 @@ use strict;
 use warnings;
 use 5.010;
 
-no if $] >= 5.018, warnings => "experimental::smartmatch";
+no if $] >= 5.018, warnings => 'experimental::smartmatch';
 
 use parent 'Class::Accessor';
 
 our $VERSION = '1.05';
 
 Travel::Status::DE::HAFAS::Result->mk_ro_accessors(
-	qw(date raw_e_delay raw_delay time train route_end info_raw));
+	qw(date info raw_e_delay raw_delay time train route_end info_raw));
 
 sub new {
 	my ( $obj, %conf ) = @_;
@@ -28,7 +28,7 @@ sub delay {
 		return $self->{raw_e_delay};
 	}
 	if (    defined $self->{raw_delay}
-		and $self->{raw_delay} ne '-'
+		and $self->{raw_delay} ne q{-}
 		and $self->{raw_delay} ne 'cancel' )
 	{
 		return $self->{raw_delay};
@@ -46,14 +46,6 @@ sub line {
 	my ($self) = @_;
 
 	return $self->{train};
-}
-
-sub info {
-	my ($self) = @_;
-
-	my $info = $self->info_raw;
-
-	return $info;
 }
 
 sub is_cancelled {
@@ -112,7 +104,7 @@ sub type {
 	my ($self) = @_;
 
 	# $self->{train} is either "TYPE 12345" or "TYPE12345"
-	my ($type) = ( $self->{train} =~ m{ ^ ([A-Z]+) }x );
+	my ($type) = ( $self->{train} =~ m{ ^ ([[:upper:]]+) }x );
 
 	return $type;
 }
@@ -172,15 +164,27 @@ Arrival/Departure date in "dd.mm.yyyy" format.
 =item $result->delay
 
 Returns the train's delay in minutes, or undef if it is unknown.
+Also returns undef if the train has been cancelled.
 
 =item $result->info
 
-Returns additional information, for instance the reason why the train is
-delayed. May be an empty string if no (useful) information is available.
+Returns additional information, for instance the most recent delay reason.
+Returns an empty string if no (useful) information is available.
 
 =item $result->is_cancelled
 
 True if the train was cancelled, false otherwise.
+
+=item $result->is_changed_platform
+
+True if the platform (as returned by the B<platform> accessor) is not the
+scheduled one. Note that the scheduled platform is unknown in this case.
+
+=item $result->messages
+
+Returns a list of message strings related to this train. Messages usually are
+service notices (e.g. "missing carriage") or detailed delay reasons
+(e.g. "switch damage between X and Y, expect delays").
 
 =item $result->line
 
@@ -192,12 +196,7 @@ or "RE 10111" (RegionalExpress train 10111, no line information).
 =item $result->platform
 
 Returns the platform from which the train will depart / at which it will
-arrive.
-
-=item $result->route
-
-Returns a list of station names the train will pass between the selected
-station and its origin/destination.
+arrive. Realtime data if available, schedule data otherwise.
 
 =item $result->route_end
 
@@ -209,40 +208,7 @@ either the train's destination or its origin station.
 
 =item $result->origin
 
-Convenience aliases for $result->route_end.
-
-=item $result->route_interesting([I<max>])
-
-Returns a list of up to I<max> (default: 3) interesting stations the train
-will pass on its journey. Since deciding whether a station is interesting or
-not is somewhat tricky, this feature should be considered experimental.
-
-The first element of the list is always the train's next stop. The following
-elements contain as many main stations as possible, but there may also be
-smaller stations if not enough main stations are available.
-
-In future versions, other factors may be taken into account as well.  For
-example, right now airport stations are usually not included in this list,
-although they should be.
-
-Note that all main stations will be stripped of their "Hbf" suffix.
-
-=item $result->route_raw
-
-Returns the raw string used to create the route array.
-
-Note that cancelled stops are filtered from B<route>, but still present in
-B<route_raw>.
-
-=item $result->route_timetable
-
-Similar to B<route>.  however, this function returns a list of array
-references of the form C<< [ arrival time, station name ] >>.
-
-=item $result->route_info
-
-Returns a string containing information related to the train's route, such as
-"landslide between X and Y, expect delays".
+Convenience aliases for C<< $result->route_end >>.
 
 =item $result->time
 
@@ -271,10 +237,6 @@ Required I<data>:
 =item B<time> => I<hh:mm>
 
 =item B<train> => I<string>
-
-=item B<route_raw> => I<string>
-
-=item B<route> => I<arrayref>
 
 =item B<route_end> => I<string>
 
