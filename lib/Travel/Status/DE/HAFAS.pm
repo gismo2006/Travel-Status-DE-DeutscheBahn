@@ -19,8 +19,9 @@ sub new {
 
 	my $date = $conf{date} // strftime( '%d.%m.%Y', localtime(time) );
 	my $time = $conf{time} // strftime( '%H:%M',    localtime(time) );
-	my $lang = $conf{language} // 'd';
-	my $mode = $conf{mode}     // 'dep';
+	my $lang    = $conf{language} // 'd';
+	my $mode    = $conf{mode}     // 'dep';
+	my $service = $conf{service}  // 'DB';
 
 	my %lwp_options = %{ $conf{lwp_options} // { timeout => 10 } };
 
@@ -35,40 +36,33 @@ sub new {
 	}
 
 	my $ref = {
+		active_service => $service,
 		developer_mode => $conf{developer_mode},
-		mot_filter     => [
-			$conf{mot}->{ice}   // 1,
-			$conf{mot}->{ic_ec} // 1,
-			$conf{mot}->{d}     // 1,
-			$conf{mot}->{nv}    // 1,
-			$conf{mot}->{s}     // 1,
-			$conf{mot}->{bus}   // 0,
-			$conf{mot}->{ferry} // 0,
-			$conf{mot}->{u}     // 0,
-			$conf{mot}->{tram}  // 0,
-		],
-		post => {
-			productsFilter => '11111111111111',
-			input          => $conf{station},
-			date           => $date,
-			time           => $time,
-			start     => 'yes',     # value doesn't matter, just needs to be set
+		post           => {
+			input => $conf{station},
+			date  => $date,
+			time  => $time,
+			start => 'yes',         # value doesn't matter, just needs to be set
 			boardType => $mode,
 			L         => 'vs_java3',
 		},
+		service => {
+			DB => {
+				url  => 'http://reiseauskunft.bahn.de/bin/bhftafel.exe',
+				name => 'Deutsche Bahn',
+				productbits =>
+				  [qw[ice ic_ec d nv s bus ferry u tram ondemand x x x x]],
+			}
+		},
 	};
-
-	#	for my $i ( 0 .. @{ $ref->{mot_filter} } ) {
-	#		if ( $ref->{mot_filter}->[$i] ) {
-	#			$ref->{post}->{"GUIREQProduct_$i"} = 'on';
-	#		}
-	#	}
 
 	bless( $ref, $obj );
 
-	$reply
-	  = $ua->post( "http://reiseauskunft.bahn.de/bin/bhftafel.exe/${lang}n",
-		$ref->{post} );
+	$ref->set_productfilter;
+
+	my $url = $ref->{service}{$service}{url} . '/' . $lang . 'n';
+
+	$reply = $ua->post( $url, $ref->{post} );
 
 	if ( $reply->is_error ) {
 		$ref->{errstr} = $reply->status_line;
@@ -101,24 +95,13 @@ sub new {
 	return $ref;
 }
 
-sub new_from_html {
-	my ( $obj, %opt ) = @_;
+sub set_productfilter {
+	my ($self) = @_;
 
-	my $ref = {
-		html => $opt{html},
-		post => { boardType => $opt{mode} // 'dep' }
-	};
+	my $service = $self->{active_service};
 
-	$ref->{post}->{boardType} = $opt{mode} // 'dep';
-
-	$ref->{tree} = XML::LibXML->load_html(
-		string            => $ref->{html},
-		recover           => 2,
-		suppress_errors   => 1,
-		suppress_warnings => 1,
-	);
-
-	return bless( $ref, $obj );
+	$self->{post}{productsFilter}
+	  = '1' x ( scalar @{ $self->{service}{$service}{productbits} } );
 }
 
 sub check_input_error {
@@ -208,6 +191,10 @@ sub results {
 	}
 
 	return @{ $self->{results} };
+}
+
+# static
+sub get_services {
 }
 
 1;
